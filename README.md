@@ -1,11 +1,6 @@
 # Mighty Fooding Time
 
-> **Unofficial fan project — not affiliated with, endorsed by, or sponsored by
-> Nintendo.** "WarioWare" is a trademark of Nintendo Co., Ltd. This is an
-> original homage to its microgame format: no Nintendo characters, sprites,
-> audio, text, or code appear anywhere here. Every visual is drawn from Phaser
-> primitives and system/Google fonts; every line of game logic is original.
-> "Mighty Fooding Time" is this project's own name, not a Nintendo product.
+*Unofficial fan project, not affiliated with Nintendo — see License at the bottom.*
 
 Five WarioWare-inspired microgames decide what you eat.
 
@@ -18,50 +13,9 @@ expose menu items, so this app never claims to know one).
 Built as a practice project for **async communication patterns** (WebSockets,
 streaming, callbacks) plus an LLM integration, with an actual payoff at the end.
 
----
-
-## Status at handoff
-
-| Piece | State |
-|---|---|
-| Game loop, all 5 microgames | Working, confirmed in browser |
-| WebSocket protocol, session state, scoring | Working, verified by `npm run test:loop` |
-| Secret-condition detection | Working, verified in the headless test |
-| **Real OpenAI call (Responses API)** | **Verified working** — see below |
-| **Real restaurant grounding (Google Places)** | **Verified working** — see below |
-| Difficulty tuning | **Untuned** — numbers were picked blind |
-| git / GitHub | Initialized, pushed to a private repo |
-
-**No offline mode.** Earlier versions fell back to a local rules table when a
-key was missing, and invented a plausible restaurant when ungrounded. Both
-were removed on purpose — this app either shows a real, grounded
-recommendation or a game-over screen; it never shows made-up restaurants.
-`streamRecommendation()` throws if `OPENAI_API_KEY` or `GOOGLE_MAPS_API_KEY`
-is missing, or if Places can't find anything nearby, and `server.js` turns
-that into a `{ type: 'game_over' }` message.
-
-**OpenAI path — verified 2026-09-03.** Ran `npm run test:loop` against the live
-Responses API with a real key: streamed correctly, model ID resolved, output
-parsed into the `VERDICT/REASON_1/REASON_2/REASON_3/DARE` contract. One real
-bug found and fixed along the way: the follow-up turn after a tool call
-(chained via `previous_response_id`) doesn't inherit `instructions` — the
-OpenAI SDK is explicit that instructions never carry across chained
-responses. That turn was going out with no persona/format instructions at
-all, which is why the model free-wrote markdown instead of the contract.
-Fixed by re-passing `instructions` on every turn, not just the first.
-
-**Grounding pivoted away from delivery-app MCP servers entirely — see "Why not
-Uber Eats/DoorDash MCP" below.** `decisionEngine.js` grounds via a plain
-function tool, `find_real_restaurants` (implemented in `googlePlaces.js`),
-instead of an MCP `tools` entry. MCP tools are executed by OpenAI's own
-infrastructure, but a custom function tool is executed by *us* — the model
-pauses mid-stream, we run the actual Google Places HTTP call (Text Search,
-returning up to 3 results with name/address/rating/photo/Maps link), and send
-the result back as a new turn (`previous_response_id` + `function_call_output`)
-before the model keeps generating. **Verified 2026-09-03** against a real
-`GOOGLE_MAPS_API_KEY` — confirmed independently by calling
-`findRestaurants()` directly (bypassing the model) and diffing its output
-against what the model wove into its reasons.
+**Status:** all 5 microgames working, WebSocket protocol and AI grounding both
+verified live (see `misc/decision-log.md` for the history), difficulty still
+untuned. No offline/fallback mode by design — see "Run it" below.
 
 ---
 
@@ -213,90 +167,42 @@ Every number was picked blind and none survived contact with a player:
 - `DodgeScene` — 260ms spawn interval, speeds 240-380
 - `DontTouchScene` — hover >60% of the round for the secret
 
-### 2. ~~Verify the Google Places grounding path live~~ — done
-Verified 2026-09-03 against real credentials: the tool call returns real
-restaurants, `[checking real restaurants nearby…]` shows in the trace, and a
-direct call to `findRestaurants()` (bypassing the model entirely) confirmed
-the data isn't hallucinated. Since then this got reworked further: it now
-returns 3 restaurants per run instead of 1, drops the invented `DISH` field
-entirely, adds photos (`GET /api/place-photo` proxies the Places Photo (New)
-endpoint so the API key never reaches the browser), a real Google Maps link
-per restaurant, and removed both fallback paths (no-OpenAI-key, no-Maps-key) —
-a missing key or a failed lookup now ends the run on a game-over screen
-instead of showing invented data.
+### 2. Housekeeping
+`public/assets/` is empty; everything is drawn with Phaser primitives and
+system fonts. Sound would add a lot — WarioWare is half audio.
 
-Cost is a non-issue at this scale: Text Search has a monthly free tier, and a
-personal project's traffic won't come close to it. Place Photo billing is
-separate from Text Search — check current pricing/quota for it in Cloud
-Console before assuming it's free, since every restaurant card now loads one.
-If you want a hard ceiling anyway, set a **quota** (not just a billing alert)
-on the Places API in Cloud Console — quotas actually block excess calls,
-alerts just notify you after the fact.
-
-### 3. Why not Uber Eats / DoorDash MCP (settled, don't re-litigate)
-Checked 2026-09-03, thoroughly. Short version: **no official food-delivery MCP
-server currently accepts a new client, period** — not just this one:
-
-- **Uber Eats** (`mcp.ubereats.com/eats-claude/mcp`): no `registration_endpoint`
-  (no Dynamic Client Registration), direct requests get a flat `403`, and
-  OpenAI's own infrastructure attempting the handshake server-side got
-  `424 Failed Dependency` listing tools. Its OAuth metadata is also missing a
-  required field (`response_types_supported`), which crashes Claude Code's
-  login flow before a browser even opens — this isn't "gated to approved
-  clients," the discovery document is broken for everyone.
-- **DoorDash** (`openapi.doordash.com/mcp/consumer`): server is alive and its
-  metadata is well-formed, but `registration_endpoint` is present and
-  explicitly empty. Confirmed directly: `claude mcp login doordash` (a
-  legitimate, "approved" client type) was refused — `Incompatible auth
-  server: does not support dynamic client registration`. Not gated to
-  outsiders; not accepting *anyone* right now.
-- **Zomato** (`mcp-server.zomato.com`): the one exception — real DCR support,
-  well-formed metadata, genuinely open to any client. Useless here anyway:
-  Zomato doesn't operate in Canada/the US.
-
-**Also ruled out: community browser-automation servers** (e.g.
-`ericzakariasson/uber-eats-mcp-server` — Playwright driving a real logged-in
-session, including clicking "Place order"). Technically works, but real
-consumer platforms run bot detection and prohibit automated access in their
-ToS; the account that gets flagged is your real Uber account, shared with
-Rides. Not worth the risk for a portfolio project. If revisited, do it against
-a throwaway account, run manually/rarely, and never let `order_food` fire
-without an explicit human click.
-
-**Conclusion:** grounding via a delivery app's own API is off the table for
-now, for structural reasons outside this codebase, not fixable by switching
-providers (OpenAI vs. Claude API — same request shape, same missing
-`client_id` problem) or writing more code. Google Places (see above) is the
-replacement: real restaurant, no OAuth, no bot-detection risk, effectively
-free at this scale. It doesn't return real menu items — there is no
-delivery-app API in the loop to get one from — so this app doesn't claim to
-recommend a dish at all anymore. It recommends 3 real restaurants and lets you
-figure out what to order once you're there.
-
-### 4. Housekeeping
-- ~~`git init`~~ — done. Pushed to a private GitHub repo, `.gitignore` covers
-  `.env` (verified nothing secret ever got staged).
-- ~~License~~ — done, MIT (see `LICENSE`). Covers the original code only —
-  it doesn't and can't license Nintendo's "WarioWare" trademark, which this
-  project doesn't use, only references as inspiration (see disclaimer at top).
-- `public/assets/` is empty; everything is drawn with Phaser primitives and
-  system fonts. Sound would add a lot — WarioWare is half audio.
-- Still open, worth doing before making the repo public:
-  - A screenshot or short GIF of a run in the README — nothing here shows
-    what it actually looks like yet.
-  - Repo description + topics on GitHub itself (`gh repo edit --description
-    ... --add-topic ...`) — helps it read as a finished project, not a dump.
-  - Third-party attribution: Phaser (MIT, loaded via CDN in `index.html`) and
-    the Bungee / Space Grotesk Google Fonts (both OFL-licensed) — fine to use
-    as-is, just worth a line crediting them if this goes public.
-- ~~`package.json` `license`/`repository`/`homepage`/`bugs` fields~~ — done,
-  pointing at `github.com/TangoMango223/mighty-food-time`.
+Still open, worth doing before making the repo public:
+- A screenshot or short GIF of a run in the README — nothing here shows
+  what it actually looks like yet.
+- Repo description + topics on GitHub itself (`gh repo edit --description
+  ... --add-topic ...`) — helps it read as a finished project, not a dump.
+- Third-party attribution: Phaser (MIT, loaded via CDN in `index.html`) and
+  the Bungee / Space Grotesk Google Fonts (both OFL-licensed) — fine to use
+  as-is, just worth a line crediting them if this goes public.
 
 ---
 
 ## License
 
 [MIT](./LICENSE) — the original code in this repo, free to use, modify, and
-redistribute. This does not extend to, and this project claims no rights over,
-Nintendo's "WarioWare" trademark or any other third-party IP referenced only
-as inspiration (see the disclaimer at the top of this file).
+redistribute.
+
+**Not affiliated with, endorsed by, or sponsored by Nintendo.** "WarioWare"
+is a trademark of Nintendo Co., Ltd.; this is an original homage to its
+microgame format, referenced only as inspiration — no Nintendo characters,
+sprites, audio, text, or code appear anywhere in this repo. Every visual is
+drawn from Phaser primitives and system/Google fonts, and every line of game
+logic is original. "Mighty Fooding Time" is this project's own name, not a
+Nintendo product. The MIT license above covers the original code only; it
+doesn't and can't extend to Nintendo's trademark or any other third-party IP.
+
+---
+
+## More context
+
+Design decisions, dated verification notes, and hosting research live in a
+local `misc/` folder — gitignored on purpose, so it won't be here if you
+cloned this from GitHub:
+- `misc/decision-log.md` — what was tried, ruled out, and verified, and when.
+- `misc/vercel-hosting-research.md` — why Render, not Vercel, is the free-tier
+  pick for this app (not deployed yet either way).
