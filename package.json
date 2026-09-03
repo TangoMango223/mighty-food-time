@@ -2,7 +2,7 @@
   "name": "variety-game-foods",
   "version": "0.1.0",
   "private": true,
-  "description": "WarioWare-style microgames that decide what you eat.",
+  "description": "WarioWare-inspired microgames that decide what you eat.",
   "type": "module",
   "main": "server/server.js",
   "scripts": {
@@ -15,5 +15,14 @@
     "express": "^5.2.1",
     "openai": "^7.9.0",
     "ws": "^8.21.3"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TangoMango223/mighty-food-time.git"
+  },
+  "homepage": "https://github.com/TangoMango223/mighty-food-time#readme",
+  "bugs": {
+    "url": "https://github.com/TangoMango223/mighty-food-time/issues"
   }
 }

@@ -1,6 +1,13 @@
 # Mighty Fooding Time
 
-Five WarioWare-style microgames decide what you eat.
+> **Unofficial fan project — not affiliated with, endorsed by, or sponsored by
+> Nintendo.** "WarioWare" is a trademark of Nintendo Co., Ltd. This is an
+> original homage to its microgame format: no Nintendo characters, sprites,
+> audio, text, or code appear anywhere here. Every visual is drawn from Phaser
+> primitives and system/Google fonts; every line of game logic is original.
+> "Mighty Fooding Time" is this project's own name, not a Nintendo product.
+
+Five WarioWare-inspired microgames decide what you eat.
 
 You play. The server tracks how badly it went. An LLM reads your performance and
 sentences you to 3 real nearby restaurants, with commentary. Every restaurant is
@@ -23,7 +30,7 @@ streaming, callbacks) plus an LLM integration, with an actual payoff at the end.
 | **Real OpenAI call (Responses API)** | **Verified working** — see below |
 | **Real restaurant grounding (Google Places)** | **Verified working** — see below |
 | Difficulty tuning | **Untuned** — numbers were picked blind |
-| git | Not initialized |
+| git / GitHub | Initialized, pushed to a private repo |
 
 **No offline mode.** Earlier versions fell back to a local rules table when a
 key was missing, and invented a plausible restaurant when ungrounded. Both
@@ -59,6 +66,10 @@ against what the model wove into its reasons.
 ---
 
 ## Run it
+
+**Prerequisites:** Node.js 22+ (uses native `fetch` and ESM throughout, no
+bundler), an OpenAI API key, and a Google Cloud API key with "Places API
+(New)" enabled.
 
 ```bash
 npm install          # once
@@ -263,6 +274,29 @@ recommend a dish at all anymore. It recommends 3 real restaurants and lets you
 figure out what to order once you're there.
 
 ### 4. Housekeeping
-- `git init` — `.gitignore` is already written and covers `.env`.
+- ~~`git init`~~ — done. Pushed to a private GitHub repo, `.gitignore` covers
+  `.env` (verified nothing secret ever got staged).
+- ~~License~~ — done, MIT (see `LICENSE`). Covers the original code only —
+  it doesn't and can't license Nintendo's "WarioWare" trademark, which this
+  project doesn't use, only references as inspiration (see disclaimer at top).
 - `public/assets/` is empty; everything is drawn with Phaser primitives and
   system fonts. Sound would add a lot — WarioWare is half audio.
+- Still open, worth doing before making the repo public:
+  - A screenshot or short GIF of a run in the README — nothing here shows
+    what it actually looks like yet.
+  - Repo description + topics on GitHub itself (`gh repo edit --description
+    ... --add-topic ...`) — helps it read as a finished project, not a dump.
+  - Third-party attribution: Phaser (MIT, loaded via CDN in `index.html`) and
+    the Bungee / Space Grotesk Google Fonts (both OFL-licensed) — fine to use
+    as-is, just worth a line crediting them if this goes public.
+- ~~`package.json` `license`/`repository`/`homepage`/`bugs` fields~~ — done,
+  pointing at `github.com/TangoMango223/mighty-food-time`.
+
+---
+
+## License
+
+[MIT](./LICENSE) — the original code in this repo, free to use, modify, and
+redistribute. This does not extend to, and this project claims no rights over,
+Nintendo's "WarioWare" trademark or any other third-party IP referenced only
+as inspiration (see the disclaimer at the top of this file).
