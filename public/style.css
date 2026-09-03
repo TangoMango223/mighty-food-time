@@ -17,7 +17,7 @@ body{
   font-family:"Space Grotesk",system-ui,sans-serif;
   display:grid; place-items:center;
 }
-#app{width:min(680px,96vw); padding:16px}
+#app{width:min(920px,96vw); padding:16px}
 
 #hud{
   display:flex; justify-content:space-between; align-items:center; gap:12px;
@@ -85,30 +85,33 @@ h3{font-family:Bungee,sans-serif; font-size:22px; margin:6px 0; color:var(--zap)
 }
 .pill-muted{background:#3a1d5e; color:#c9b3e8}
 .dare{
-  width:min(460px,100%); margin-top:4px; padding:10px; font-size:13px; line-height:1.5; text-align:left;
+  width:min(800px,100%); margin-top:4px; padding:10px; font-size:13px; line-height:1.5; text-align:left;
   background:#0b0416; border-left:4px solid var(--cyan); border-radius:6px;
 }
-#result-verdict{color:var(--zap); max-width:560px}
+#result-verdict{color:var(--zap); max-width:720px}
 
 .rest-list{
-  width:100%; display:flex; flex-direction:column; gap:12px;
-  max-width:460px; overflow-y:auto;
+  width:100%; max-width:840px; display:grid; grid-template-columns:repeat(3, 1fr);
+  gap:14px; align-items:start; overflow-y:auto;
+}
+@media (max-width:640px){
+  .rest-list{grid-template-columns:1fr}
 }
 .rest-card{
-  display:flex; gap:12px; text-align:left; padding:12px;
+  display:flex; flex-direction:column; min-width:0; text-align:left; padding:14px;
   background:var(--panel); border:3px solid #000; border-radius:14px; box-shadow:0 5px 0 #000;
 }
 .rest-photo{
-  width:84px; height:84px; flex:0 0 auto; border-radius:10px; object-fit:cover;
-  border:2px solid #000; background:#0b0416;
+  width:100%; height:140px; border-radius:10px; object-fit:cover;
+  border:2px solid #000; background:#0b0416; margin-bottom:10px;
 }
 .rest-photo-empty{
-  display:flex; align-items:center; justify-content:center; font-size:28px;
+  display:flex; align-items:center; justify-content:center; font-size:40px;
 }
-.rest-body{min-width:0; flex:1}
+.rest-body{min-width:0}
 .rest-head{display:flex; gap:6px; margin-bottom:4px}
-.rest-name{font-size:16px; margin:2px 0; color:var(--zap)}
-.rest-address{margin:2px 0; font-size:11px; opacity:.65; line-height:1.4}
-.rest-reason{margin:6px 0 4px; font-size:13px; line-height:1.5}
+.rest-name{font-size:17px; margin:2px 0; color:var(--zap); line-height:1.25}
+.rest-address{margin:2px 0; font-size:12px; opacity:.65; line-height:1.4}
+.rest-reason{margin:8px 0 6px; font-size:14px; line-height:1.55}
 .rest-link{font-size:12px; color:var(--cyan); text-decoration:none; font-weight:700}
 .rest-link:hover{text-decoration:underline}
