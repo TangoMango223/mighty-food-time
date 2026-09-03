@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mighty Fooding Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <span id="hud-progress">READY</span>
+      <span id="hud-score"></span>
+      <span id="hud-conn" class="conn-off">offline</span>
+    </header>
+
+    <main id="stage">
+      <div id="phaser-root"></div>
+
+      <!-- Title -->
+      <section class="screen" id="screen-title">
+        <h1>MIGHTY<br><span class="accent">FOODING TIME</span></h1>
+        <p class="tagline">Five microgames decide what you eat.<br>No takebacks.</p>
+        <button class="big-btn" id="btn-start">START</button>
+        <p class="fineprint" id="ai-mode">checking AI mode…</p>
+      </section>
+
+      <!-- Between-game flash -->
+      <section class="screen hidden" id="screen-flash">
+        <h2 id="flash-text">GO!</h2>
+      </section>
+
+      <!-- AI thinking -->
+      <section class="screen hidden" id="screen-thinking">
+        <h2 class="accent">JUDGING YOU…</h2>
+        <div id="profile-chips"></div>
+        <pre id="thinking-stream"></pre>
+      </section>
+
+      <!-- Result -->
+      <section class="screen hidden" id="screen-result">
+        <h2 id="result-verdict"></h2>
+        <div id="result-restaurants" class="rest-list"></div>
+        <div class="dare"><strong>YOLO DARE:</strong> <span id="result-dare"></span></div>
+        <button class="big-btn" id="btn-again">PLAY AGAIN</button>
+      </section>
+
+      <!-- Game over: the AI couldn't produce a real recommendation. No fake data, ever. -->
+      <section class="screen hidden" id="screen-gameover">
+        <h2 class="accent">GAME OVER</h2>
+        <p id="gameover-message" class="tagline"></p>
+        <button class="big-btn" id="btn-gameover-again">PLAY AGAIN</button>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./client.js"></script>
+</body>
+</html>

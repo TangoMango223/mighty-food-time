@@ -1,0 +1,19 @@
+{
+  "name": "variety-game-foods",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WarioWare-style microgames that decide what you eat.",
+  "type": "module",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js",
+    "test:loop": "node scripts/protocol-test.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^7.9.0",
+    "ws": "^8.21.3"
+  }
+}
